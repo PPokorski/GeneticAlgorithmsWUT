@@ -51,21 +51,22 @@ class FloorPlan:
 if __name__ == '__main__':
     pass
 
-    [grid, corners] = floor_loader.load_map('/path/to/image', '/path/to/binary/corners')
+    [grid, corners] = floor_loader.load_map('C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/grid.png',
+                                            'C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/corners.txt')
     plan = FloorPlan(grid, corners)
 
-    # tracer = ray_trace.RayTrace(tiles.occupied_tiles, tiles.Tiles.SEEN, False)
+    tracer = ray_trace.RayTrace(tiles.occupied_tiles, tiles.Tiles.SEEN, False)
 
-    # plan.cameras = [camera.Camera([50, 50], 0.0, 3*3.14/2.0, range_of_view=100.0)]
+    plan.cameras = [camera.Camera([50, 50], 0.0, 3*3.14/2.0, range_of_view=100.0)]
 
-    # plan.mark_all_cameras(tracer)
+    plan.mark_all_cameras(tracer)
 
-    # img = image_from_grid(plan.visibility_map)
-    # drawer = ImageDraw.Draw(img)
+    img = image_from_grid(plan.visibility_map)
+    drawer = ImageDraw.Draw(img)
 
-    # for corner in plan.corners:
-        # drawer.point(corner, (255, 0, 0))
+    for corner in plan.corners:
+        drawer.point(corner, (255, 0, 0))
 
-    # drawer.point([50, 50], (255, 0, 0))
-    # drawer.point([200, 200], (255, 0, 0))
-    # img.show()
+    drawer.point([50, 50], (255, 0, 0))
+    drawer.point([200, 200], (255, 0, 0))
+    img.show()
