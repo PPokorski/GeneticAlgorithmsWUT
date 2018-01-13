@@ -2,7 +2,7 @@
 # coding: utf-8
 
 import copy
-
+import PIL
 import tiles
 import camera
 import ray_trace
@@ -61,8 +61,8 @@ if __name__ == '__main__':
 
     plan.mark_all_cameras(tracer)
 
-    img = image_from_grid(plan.visibility_map)
-    drawer = ImageDraw.Draw(img)
+    img = floor_loader.grid_to_image(plan.visibility_map)
+    drawer = PIL.ImageDraw.Draw(img)
 
     for corner in plan.corners:
         drawer.point(corner, (255, 0, 0))
