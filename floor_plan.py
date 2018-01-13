@@ -8,6 +8,10 @@ import camera
 import ray_trace
 import floor_loader
 
+import sys
+sys.path.append('cd agp_algorithm')
+
+from agp_algorithm import triangulation_test
 
 class FloorPlan:
     def __init__(self, rooms_map, corners):
@@ -51,13 +55,22 @@ class FloorPlan:
 if __name__ == '__main__':
     pass
 
-    [grid, corners] = floor_loader.load_map('C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/grid.png',
-                                            'C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/corners.txt')
+    [grid, corners] = floor_loader.load_map('C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/mapa.png',
+                                            'C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/mapa.txt')
     plan = FloorPlan(grid, corners)
+    #camera_instance = camera.Camera([0, 0])
+    print(corners)
 
     tracer = ray_trace.RayTrace(tiles.occupied_tiles, tiles.Tiles.SEEN, False)
 
-    plan.cameras = [camera.Camera([50, 50], 0.0, 3*3.14/2.0, range_of_view=100.0)]
+    k = 0
+
+    for i in plan.corners:
+        plan.cameras.append(camera.Camera(corners[k], 0.8, 1*3.14/2.0, range_of_view=20.0))
+        k += 1
+
+    #plan.cameras = [camera.Camera(corners[0], 0.8, 1*3.14/2.0, range_of_view=20.0)
+    #                camera.Camera(corners[20], 1.2, 1 * 3.14 / 2.0, range_of_view=20.0)]
 
     plan.mark_all_cameras(tracer)
 
@@ -67,6 +80,9 @@ if __name__ == '__main__':
     for corner in plan.corners:
         drawer.point(corner, (255, 0, 0))
 
-    drawer.point([50, 50], (255, 0, 0))
-    drawer.point([200, 200], (255, 0, 0))
+   # drawer.point([50, 50], (255, 0, 0))
+
+    tri_cords, segments = triangulation_test.triangulate_points(corners)
     img.show()
+
+    tri_cords.show()
