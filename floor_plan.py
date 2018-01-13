@@ -51,8 +51,8 @@ class FloorPlan:
 if __name__ == '__main__':
     pass
 
-    # [grid, corners] = floor_loader.load_map('/path/to/image', '/path/to/binary/corners')
-    # plan = FloorPlan(grid, corners)
+    [grid, corners] = floor_loader.load_map('/path/to/image', '/path/to/binary/corners')
+    plan = FloorPlan(grid, corners)
 
     # tracer = ray_trace.RayTrace(tiles.occupied_tiles, tiles.Tiles.SEEN, False)
 
