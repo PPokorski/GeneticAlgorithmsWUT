@@ -1,9 +1,6 @@
-# ! /usr/bin/env python
-# coding: utf-8
 
 from point import Point
 from side import Side
-
 
 class Triangle(object):
     """ Class representing a Triangle that is composed by
@@ -41,26 +38,5 @@ class Triangle(object):
             else:
                 return self.v
         return self.u
-
-
-# Testing class
-if __name__ == "__main__":
-
-    u = Point(0, 2)
-    v = Point(2, 0)
-    w = Point(5, 5)
-
-    triangle = Triangle(u, v, w)
-    print(triangle)
-    print("Point u = %s" % str(triangle.u))
-    print("Point v = %s" % str(triangle.v))
-    print("Point w = %s" % str(triangle.w))
-
-    # Testing class iterability
-    for point in triangle:
-        print(point)
-
-    # Testing the exception
-    Triangle(None, None, None)
 
 
