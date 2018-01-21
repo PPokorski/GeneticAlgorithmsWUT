@@ -3,6 +3,8 @@ from point import Point
 from triangulation import Triangulation
 from coloring import Coloring
 import threading
+import triangulation_test
+
 
 class ArtGallery(object):
     def __init__(self, point):
@@ -69,9 +71,18 @@ class ArtGallery(object):
                 self._color.process()
             self.version += 1
 
+    def triangulate_all(self):
+
+        with self.lock:
+            triangulated = self._triangulation.process()
+            if (triangulated):
+               # coloring
+                self._color.process()
+
+
 import math
-origin = [251, 298]
-refvec = [251, 251]
+origin = [152, 26]
+refvec = [59, 34]
 
 def clockwiseangle_and_distance(point):
     # Vector between point and the origin: v = p - o
@@ -98,14 +109,12 @@ def clockwiseangle_and_distance(point):
 import numpy as np
 import matplotlib.pyplot as plt
 import graphics
-
+from agp_algorithm import testing
 
 if __name__ == '__main__':
     pass
 
-    print("Welcome to the art gallery simulation by students of IIT Roorkee!")
-    #args = sys.argv
-    print("Starting...")
+    print("Start ")
     #filename = args[1]
     filename = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/temp.poly"
     filename2 = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/coords_sorted.poly"
@@ -122,16 +131,28 @@ if __name__ == '__main__':
     file.close()
 
     points_not_sorted = np.array(points)
-    print(points_not_sorted)
+
+    alpha_array = [0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03]
+    alpha = alpha_array[i]
+    concave_hull, edge_points = testing.alpha_shape(points_not_sorted,
+                                            alpha=alpha)
+    edge_points = np.array(edge_points)
+    edge_points.flatten()
+    print(edge_points)
+
     sort = sorted(points_not_sorted, key=clockwiseangle_and_distance)
     sorted_points = np.array(sort)
-    print(sorted_points)
+    #print(sorted_points)
 
-
+    #from scipy.spatial import ConvexHull
+    #hull = ConvexHull(points)
+    #print(hull)
+    #sorted_points = np.array(hull.points)
+    #print(sorted_points)
     file = open(filename2, 'w')
     file.write('71\n')
-    for vertice in sorted_points:
-        file.write("%d %d\n" % (vertice[0], vertice[1]))
+    for vertice in edge_points:
+        file.write("%d %d\n" % vertice[0], vertice[1])
     file.close()
     #filename = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/coords.txt"
 
@@ -144,6 +165,8 @@ if __name__ == '__main__':
     triangle = []
     vertices = []
     i = 0
+
+
     triangles = g._triangulation.get_triangles()
     #triangles = np.array(triangles)
 
@@ -175,13 +198,13 @@ if __name__ == '__main__':
     #tri = Delaunay(sorted_points, qhull_options = "QJ")
 
     mask = [
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        1, 1, 0, 0, 1, 1, 1, 1, 1, 1,
+        0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -189,15 +212,17 @@ if __name__ == '__main__':
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
         0, 0, 0, 0, 0, 0, 0
     ]
-    triang.set_mask(mask)
+    #triang.set_mask(mask)
     plt.figure(2)
 
     plt.triplot(triang, 'bo-', lw=1)
     for j, p in enumerate(sorted_points):
         plt.text(p[0] - 0.03, p[1] + 0.03, j, ha='right')  # label the points
 
-    print(tri)
-    #for j, s in enumerate(tri.simplices):
+
+
+
+    #for j, s in enumerate(triang.triangles):
     #    p = sorted_points[s].mean(axis=0)
     #    plt.text(p[0], p[1], '#%d' % j, ha='center')  # label triangles
 
@@ -207,7 +232,6 @@ if __name__ == '__main__':
     #plt.plot(points[:, 0],points[:,1])
     #plt.triplot(points[:, 0], points[:, 2], vertices, ld=1)
     #plt.plot(vertices)
-    plt.show()
 
     guard = []
 
@@ -226,3 +250,4 @@ if __name__ == '__main__':
 
     print("END!")
 
+    plt.show()

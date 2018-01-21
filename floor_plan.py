@@ -14,6 +14,7 @@ import sys
 sys.path.append('cd agp_algorithm')
 
 from agp_algorithm import triangulation_test
+from agp_algorithm import testing
 
 class FloorPlan:
     def __init__(self, rooms_map, corners):
@@ -162,15 +163,6 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     points = np.array(corners)
-    room1 = [corners[0], corners[1], corners[2], corners[3]]
-    room2 = [corners[4], corners[5], corners[6], corners[7]]
-
-    tri_room1 = triangulation_test.triangulate_points(room1)
-    tri_room2 = triangulation_test.triangulate_points(room2)
-    tri_museum = triangulation_test.triangulate_points(points)
-    #plt.plot([corners[0][0], corners[1][0], corners[2][0], corners[3][0]], [corners[0][1], corners[1][1], corners[2][1], corners[3][1]], 'o')
-    #plt.plot(points[:, 0], points[:, 1], 'o')
-    #plt.show();
 
     #plt.figure(1)
     #plt.triplot(points[:, 0], points[:, 1], tri_museum.simplices.copy())
