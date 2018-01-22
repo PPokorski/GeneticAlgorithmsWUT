@@ -60,6 +60,7 @@ def alpha_shape(points, alpha):
     tri = Delaunay(coords)
     edges = set()
     edge_points = []
+    triang = []
     # loop over triangles:
     # ia, ib, ic = indices of corner points of the
     # triangle
@@ -82,21 +83,25 @@ def alpha_shape(points, alpha):
             add_edge(edges, edge_points, coords, ia, ib)
             add_edge(edges, edge_points, coords, ib, ic)
             add_edge(edges, edge_points, coords, ic, ia)
+            triang.append([ia, ib, ic])
     m = geometry.MultiLineString(edge_points)
     triangles = list(polygonize(m))
-    return cascaded_union(triangles), edge_points
+    return cascaded_union(triangles), edge_points, edges, triang
     #return edge_points
+
+
+from matplotlib.collections import LineCollection
+import matplotlib.pyplot as plt
 
 
 if __name__ == '__main__':
     pass
 
-    filename = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/temp.poly"
+    filename = "./inputs/temp.poly"
     file = open(filename, "r")
 
     points = []
     with open(filename, "r") as hfile:
-        hfile.readline()
         i = 0
         for line in hfile:
             x, y = line.split()
@@ -105,30 +110,35 @@ if __name__ == '__main__':
 
     points_not_sorted = np.array(points)
 
-    from matplotlib.collections import LineCollection
-
-#    points = [geometry.shape(points_not_sorted)]
-    #cascaded_union, edge_points = alpha_shape(points_not_sorted, alpha=0.015)
-    #_ = plot_polygon(concave_hull)
-    #_ = pl.plot(x, y, 'o', color='#f16824')
-    import matplotlib.pyplot as plt
-
-    alpha_array = [0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03]
-    for i in range(10):
+    alpha_array = [0.011, 0.015, 0.017, 0.02, 0.023, 0.027, 0.039]
+    for i in range(7):
         alpha = alpha_array[i]
-        concave_hull, edge_points = alpha_shape(points_not_sorted,
-                                                alpha=alpha)
-        print(edge_points)
+        concave_hull, edge_points, edges, triang = alpha_shape(points_not_sorted,
+                                                       alpha=alpha)
+
+        print(points_not_sorted[triang])
+        plt.triplot(points_not_sorted[:, 0], points_not_sorted[:, 1], triang, 'bo-', lw=1)
+
+        _edge_points = []
+        for edge in edge_points:
+            if not isinstance(edge, np.ma.MaskedArray):
+                edge = np.asarray(edge, int).tolist()
+            _edge_points.append(edge)
+
+        #print(concave_hull)
+        #print(_edge_points)
+        #print(edges)
+
         # print concave_hull
         lines = LineCollection(edge_points)
-        pl.figure(figsize=(10, 10))
-        #pl.title('Alpha={0} Delaunay triangulation'.format(
-        #    alpha))
+        #pl.figure(figsize=(10, 10))
+
         pl.gca().add_collection(lines)
-        #delaunay_points = np.array([point.coords[0]
-        #                            for point in points_not_sorted])
+
         pl.plot(points_not_sorted[:, 0], points_not_sorted[:, 1],
                 'o', color='#f16824')
 
         #plot_polygon(concave_hull)
         #pl.plot(x, y, 'o', color='#f16824')
+        plt.show()
+    pl.show()

@@ -2,8 +2,11 @@ import sys
 from point import Point
 from triangulation import Triangulation
 from coloring import Coloring
+from agp_algorithm import testing
 import threading
-import triangulation_test
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.tri as tri
 
 
 class ArtGallery(object):
@@ -81,8 +84,8 @@ class ArtGallery(object):
 
 
 import math
-origin = [152, 26]
-refvec = [59, 34]
+origin = [100, 17]
+refvec = [100, 17]
 
 def clockwiseangle_and_distance(point):
     # Vector between point and the origin: v = p - o
@@ -106,132 +109,119 @@ def clockwiseangle_and_distance(point):
     return angle, lenvector
 
 
-import numpy as np
-import matplotlib.pyplot as plt
-import graphics
-from agp_algorithm import testing
+def sorting_algorithm(points):
+
+    x = points[:, 0]
+    y = points[:, 1]
+    cx = np.mean(x)
+    cy = np.mean(y)
+    angle = np.arctan2(y - cy, x - cx)
+    order = angle.ravel().argsort()
+
+    x = x[order]
+    y = y[order]
+
+    return np.vstack([x, y])
 
 if __name__ == '__main__':
     pass
 
-    print("Start ")
-    #filename = args[1]
-    filename = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/temp.poly"
-    filename2 = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/coords_sorted.poly"
-    filename3 = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/agp_algorithm/inputs/enterprise.poly"
-    file = open(filename, 'r')
+    # create file paths for testing
+    filename = "./inputs/temp.poly"
+    filename2 = "./inputs/coords_sorted.poly"
+    filename3 = "./inputs/enterprise.poly"
+    filename4 = "./inputs/museum.poly"
+    filename_guards = "./inputs/guards.poly"
 
+    # read coordinates from first file
+    file = open(filename, 'r')
     points = []
     with open(filename, "r") as hfile:
-        hfile.readline()
         i = 0
         for line in hfile:
             x, y = line.split()
             points.append([int(x), int(y)])
     file.close()
 
+    # sort your points clockwise
     points_not_sorted = np.array(points)
+    temp = sorting_algorithm(points_not_sorted)
 
+    # create coordinates tuple
+    new_coords = []
+    i = 0
+    for t in temp[0]:
+        new_coords.append([temp[0][i], temp[1][i]])
+        i += 1
+
+    # array for alpha shape values
     alpha_array = [0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03]
-    alpha = alpha_array[i]
-    concave_hull, edge_points = testing.alpha_shape(points_not_sorted,
-                                            alpha=alpha)
-    edge_points = np.array(edge_points)
-    edge_points.flatten()
-    print(edge_points)
+    alpha = alpha_array[1]
 
+    # get your alpha shape from given points
+    concave_hull,\
+    edge_points,\
+    edges,\
+    triang = testing.alpha_shape(points_not_sorted, alpha=alpha)
+
+    _edge_points = []
+    for edge in edge_points:
+        if not isinstance(edge, np.ma.MaskedArray):
+            edge = np.asarray(edge, int).tolist()
+        _edge_points.append(edge)
+
+    coords = []
+    for vertice in _edge_points:
+        coords.append([int(vertice[0][0]), int(vertice[0][1])])
+    #print(coords)
+
+    # sorted points by using clockwiseangle_and_distance function
     sort = sorted(points_not_sorted, key=clockwiseangle_and_distance)
     sorted_points = np.array(sort)
-    #print(sorted_points)
 
-    #from scipy.spatial import ConvexHull
-    #hull = ConvexHull(points)
-    #print(hull)
-    #sorted_points = np.array(hull.points)
-    #print(sorted_points)
+
     file = open(filename2, 'w')
-    file.write('71\n')
-    for vertice in edge_points:
-        file.write("%d %d\n" % vertice[0], vertice[1])
+    file.write('%d\n' % len(new_coords))
+    for vertice in reversed(new_coords):
+        file.write("%d " % vertice[0])
+        file.write("%d\n" % vertice[1])
     file.close()
-    #filename = "C:/Users/Kacper/Desktop/github/GeneticAlgorithmsWUT/pictures/coords.txt"
 
+    # load your correct points to ArtGallery object
     tmp = ArtGallery.load(filename2)
+    #print(tmp)
 
     g = ArtGallery(tmp.pop(0))
     for p in tmp:
         g.include(p)
 
     triangle = []
-    vertices = []
-    i = 0
-
-
     triangles = g._triangulation.get_triangles()
-    #triangles = np.array(triangles)
-
+    vertex_color = []
     guard_point = g.get_points()
-
 
     for t in triangles:
         i += 1
         print("Triangle %d => (%s,%s)[%s] (%s,%s)[%s] (%s,%s)[%s]" % (i, t.u.x, t.u.y, t.u.color,t.v.x, t.v.y, t.v.color,t.w.x, t.w.y, t.w.color))
         triangle.append([[t.u.x, t.u.y], [t.v.x, t.v.y], [t.w.x, t.w.y]])
+        vertex_color.append([t.u.color, t.v.color, t.w.color])
 
     plt.figure(1)
-    #plt.scatter(sorted_points[:, 0], sorted_points[:, 1])
     pts = np.array(sorted_points)
     plt.scatter(pts[:, 0], pts[:, 1])
-    #test = np.array(triangle)
+
     for trian in triangle:
         test = plt.Polygon(trian, fill=None)
         plt.gca().add_patch(test)
 
-
-
  ######################
-    from scipy.spatial import Delaunay
 
-    import matplotlib.tri as tri
-    #sorted_points -= sorted_points.mean(axis=0)
-    triang = tri.Triangulation(sorted_points[:, 0], sorted_points[:, 1])
-    #tri = Delaunay(sorted_points, qhull_options = "QJ")
+    triang = tri.Triangulation(pts[:, 0], pts[:, 1])
 
-    mask = [
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1, 1, 0, 0, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 0, 0, 0, 0, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 0, 0, 0, 0, 0
-    ]
-    #triang.set_mask(mask)
     plt.figure(2)
-
     plt.triplot(triang, 'bo-', lw=1)
-    for j, p in enumerate(sorted_points):
+    for j, p in enumerate(pts):
         plt.text(p[0] - 0.03, p[1] + 0.03, j, ha='right')  # label the points
-
-
-
-
-    #for j, s in enumerate(triang.triangles):
-    #    p = sorted_points[s].mean(axis=0)
-    #    plt.text(p[0], p[1], '#%d' % j, ha='center')  # label triangles
-
-    #vertices = np.asarray(triangle)
-    #print(vertices[0])
-
-    #plt.plot(points[:, 0],points[:,1])
-    #plt.triplot(points[:, 0], points[:, 2], vertices, ld=1)
-    #plt.plot(vertices)
 
     guard = []
 
@@ -240,14 +230,21 @@ if __name__ == '__main__':
         if g.is_guard(p):
             guard.append(p)
 
+    file = open(filename_guards, 'w')
+    for vertice in guard:
+        file.write("%d " % vertice[1])
+        file.write("%d\n" % vertice[2])
+    file.close()
+
     print(guard)
 
     print("Min_color = " + str(g._color.get_min_color()))
-    print("color[0] = " + str(g._color.get_color_count(0)))
     print("color[1] = " + str(g._color.get_color_count(1)))
     print("color[2] = " + str(g._color.get_color_count(2)))
     print("color[3] = " + str(g._color.get_color_count(3)))
 
-    print("END!")
-
     plt.show()
+
+
+
+
