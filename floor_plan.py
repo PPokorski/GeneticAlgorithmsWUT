@@ -83,16 +83,15 @@ if __name__ == '__main__':
 
 
     tracer = ray_trace.RayTrace(tiles.occupied_tiles, tiles.Tiles.SEEN, False)
-    print(tracer)
-    print(len(grid))
-    print(len(corners))
-    k = 0
+    #print(tracer)
+    #print(len(grid))
+    #print(len(corners))
 
     filename_guards = "./agp_algorithm/inputs/guards.poly"
     #file = open(filename_guards, 'r')
     points = []
     with open(filename_guards, "r") as hfile:
-        hfile.readline()
+        #hfile.readline()
         i = 0
         for line in hfile:
             x, y = line.split()
@@ -102,18 +101,22 @@ if __name__ == '__main__':
     alpha_array = [0.021, 0.022, 0.023, 0.024, 0.025, 0.026, 0.027, 0.028, 0.029, 0.03]
     alpha = alpha_array[1]
 
-    get_points = np.array(points)
+    guards_points = np.array(points)
 
     concave_hull,\
     edge_points,\
     edges,\
     triang = testing.alpha_shape(points2, alpha=alpha)
 
-
-    for i in points:
+    k = 0
+    for i in guards_points:
         plan.cameras.append(camera.Camera(points[k], 0.8, 1*3.14/2.0, range_of_view=20.0))
         k += 1
-
+    #plan.cameras.append(camera.Camera([50, 50], 0.8, 1 * 3.14 / 2.0, range_of_view=20.0))
+    #plan.cameras.append(camera.Camera([50, 80], 0.8, 1 * 3.14 / 2.0, range_of_view=20.0))
+    #plan.cameras.append(camera.Camera([50, 100], 0.8, 1 * 3.14 / 2.0, range_of_view=20.0))
+    #plan.cameras = [camera.Camera([50, 80], 0.8, 1 * 3.14 / 2.0, range_of_view=20.0)]
+    #plan.cameras = [camera.Camera([50, 50], 0.8, 1 * 3.14 / 2.0, range_of_view=20.0)]
     plan.mark_all_cameras(tracer)
 
     img = floor_loader.grid_to_image(plan.visibility_map)
@@ -124,38 +127,12 @@ if __name__ == '__main__':
     #for line in edge_points:
     #    drawer.line(line, fill=255)
 
+    area = plan.get_coverage()
+    print(area)
     img.show()
 
 
 ###########################################################
 ###########################################################
-
-    def place_camera_new_position(position):
-        _angle   = position.angle
-        _range   = position.range
-        _corners = position.corners
-
-        plan.cameras.append(camera.Camera(corners[k],
-                                          0.8,
-                                          1 * 3.14 / 2.0,
-                                          range_of_view=20.0)
-                            )
-
-
-    ################### GENERIC ALGORITHM ####################
-    dest_area = 0.9 # percentage of camera area
-                    # which we want to get
-
-    total_area = 0
-    new_area = 0
-    old_area = 0
-
-    #while total_area >= dest_area:
-    #    place_camera_new_position(&position)
-    #    new_area = get_camera_area();
-    #    if new_area < old_area:
-    #        process_mutation(&position)
-    #    old_area = new_area
-
 
 

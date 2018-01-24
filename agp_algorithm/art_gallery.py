@@ -123,6 +123,49 @@ def sorting_algorithm(points):
 
     return np.vstack([x, y])
 
+
+def convex_hull(points):
+    """Computes the convex hull of a set of 2D points.
+
+    Input: an iterable sequence of (x, y) pairs representing the points.
+    Output: a list of vertices of the convex hull in counter-clockwise order,
+      starting from the vertex with the lexicographically smallest coordinates.
+    Implements Andrew's monotone chain algorithm. O(n log n) complexity.
+    """
+
+    # Sort the points lexicographically (tuples are compared lexicographically).
+    # Remove duplicates to detect the case we have just one unique point.
+    points = sorted(set(points))
+
+    # Boring case: no points or a single point, possibly repeated multiple times.
+    if len(points) <= 1:
+        return points
+
+    # 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
+    # Returns a positive value, if OAB makes a counter-clockwise turn,
+    # negative for clockwise turn, and zero if the points are collinear.
+    def cross(o, a, b):
+        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+    # Build lower hull
+    lower = []
+    for p in points:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+
+    # Build upper hull
+    upper = []
+    for p in reversed(points):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+
+    # Concatenation of the lower and upper hulls gives the convex hull.
+    # Last point of each list is omitted because it is repeated at the beginning of the other list.
+    return lower[:-1] + upper[:-1]
+
+
 if __name__ == '__main__':
     pass
 
@@ -137,6 +180,7 @@ if __name__ == '__main__':
     file = open(filename, 'r')
     points = []
     with open(filename, "r") as hfile:
+        hfile.readline()
         i = 0
         for line in hfile:
             x, y = line.split()
@@ -146,6 +190,7 @@ if __name__ == '__main__':
     # sort your points clockwise
     points_not_sorted = np.array(points)
     temp = sorting_algorithm(points_not_sorted)
+    #temp = convex_hull(points_not_sorted)
 
     # create coordinates tuple
     new_coords = []
@@ -181,8 +226,8 @@ if __name__ == '__main__':
 
 
     file = open(filename2, 'w')
-    file.write('%d\n' % len(new_coords))
-    for vertice in reversed(new_coords):
+    file.write('%d\n' % len(sorted_points))
+    for vertice in (sorted_points):
         file.write("%d " % vertice[0])
         file.write("%d\n" % vertice[1])
     file.close()
@@ -200,15 +245,36 @@ if __name__ == '__main__':
     vertex_color = []
     guard_point = g.get_points()
 
+    plt.figure(1)
+    pts = np.array(new_coords)
+
     for t in triangles:
         i += 1
         print("Triangle %d => (%s,%s)[%s] (%s,%s)[%s] (%s,%s)[%s]" % (i, t.u.x, t.u.y, t.u.color,t.v.x, t.v.y, t.v.color,t.w.x, t.w.y, t.w.color))
         triangle.append([[t.u.x, t.u.y], [t.v.x, t.v.y], [t.w.x, t.w.y]])
         vertex_color.append([t.u.color, t.v.color, t.w.color])
+        if t.u.color == 1:
+            plt.scatter(t.u.x, t.u.y, color='red')
+        elif t.u.color == 2:
+            plt.scatter(t.u.x, t.u.y, color='green')
+        elif t.u.color == 3:
+            plt.scatter(t.u.x, t.u.y, color='blue')
 
-    plt.figure(1)
-    pts = np.array(sorted_points)
-    plt.scatter(pts[:, 0], pts[:, 1])
+        if t.v.color == 1:
+            plt.scatter(t.v.x, t.v.y, color='red')
+        elif t.v.color == 2:
+            plt.scatter(t.v.x, t.v.y, color='green')
+        elif t.v.color == 3:
+            plt.scatter(t.v.x, t.v.y, color='blue')
+
+
+        if t.w.color == 1:
+            plt.scatter(t.w.x, t.w.y, color='red')
+        elif t.w.color == 2:
+            plt.scatter(t.w.x, t.w.y, color='green')
+        elif t.w.color == 3:
+            plt.scatter(t.w.x, t.w.y, color='blue')
+    #plt.scatter(pts[:, 0], pts[:, 1])
 
     for trian in triangle:
         test = plt.Polygon(trian, fill=None)
