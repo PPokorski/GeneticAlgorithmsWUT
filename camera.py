@@ -11,7 +11,7 @@ def normalize_angle(angle):
 
 
 class Camera:
-    def __init__(self, position=None, orientation=0.0,
+    def __init__(self, position=[0, 0], orientation=0.0,
                  angle_of_view=1.57, range_of_view=1.0,
                  angular_resolution=0.02):
 
