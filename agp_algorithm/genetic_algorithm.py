@@ -47,7 +47,7 @@ class Population(object):
 
 
 def computePerfPopulation(population, target_area):
-    populationPerf = [Population() for _ in range(100)]
+    populationPerf = [Population() for _ in range(50)]
     i = 0
     #populationPerf = [list(individual) for individual in set(fitness(target_area, individual) for individual in population)]
     for individual in population:
@@ -125,9 +125,9 @@ def printSimpleResult(historic, target_area, number_of_generation):  # bestSolut
     print("Cameras positions:\r\n")
     i = 0
     for individual in result.camera:
-        print(" " + individual.position)
+        print(" " + str(individual.position))
         i += 1
-    print("Total area: " + result.total_area)
+    print("Total area: %.2f" % float(result.total_area * 100.0))
 
 
 # analysis tools
